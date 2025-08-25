@@ -1,3 +1,7 @@
+Holis! A continuación podrás ver un resumen de lo que se estuvo haciendo en esta demo repecto a la API creada para el manejo de rutas, optimizacion de las mismas y escalabilidad.
+Luego de la finalizacion del código me tomé el tiempo de pasarlo por IA para poder explicar a nuevos usuarios mediante este README de manera detallada el funcionamiento de la app, cómo ejecutarla, la estructura esperable y como probarla con postman. 
+Espero pueda ser de utilidad! Saludos!
+
 # DEYA API - Popups desde Supabase
 
 API REST en Node.js con Express para obtener información de popups desde una base de datos PostgreSQL alojada en Supabase.
