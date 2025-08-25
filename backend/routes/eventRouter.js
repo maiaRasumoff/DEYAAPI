@@ -5,9 +5,9 @@ const { validateId } = require('../middlewares/validation');
 const router = express.Router();
 
 router.get('/', listEvents);
+router.get('/barrioId/:id', validateId, getBarrioById);
 router.get('/:id', validateId, getEventDetail);
 router.get('/:id/full', validateId, getEventFullDetail);
-router.get("/barrioId/:id", getBarrioById);
 
 
 

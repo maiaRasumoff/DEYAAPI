@@ -164,21 +164,18 @@ async function getBarrioById(req, res) {
 
   try {
     const result = await db.query(
-      "SELECT idbarrio, nombrebarrio FROM barrio WHERE idbarrio = $1",
+      'SELECT nombre FROM barrio WHERE idbarrio = $1',
       [id]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Barrio no encontrado" });
+      return res.status(404).json({ error: 'Barrio no encontrado' });
     }
 
-    res.json({
-      message: "Barrio encontrado",
-      data: result.rows[0],
-    });
+    return res.status(200).json({ nombre: result.rows[0].nombre });
   } catch (error) {
-    console.error("❌ Error obteniendo barrio:", error);
-    res.status(500).json({ message: "Error al obtener el barrio" });
+    console.error('❌ Error obteniendo barrio:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
 }
 
