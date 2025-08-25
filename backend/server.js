@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const eventRouter = require('./routes/eventRouter');
+const { logger, errorHandler } = require('./middlewares');
 
 const app = express();
 
@@ -17,11 +18,8 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Logging middleware
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
+// Logging middleware personalizado
+app.use(logger);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -43,14 +41,8 @@ app.use('*', (req, res) => {
   });
 });
 
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error('❌ Error no manejado:', err);
-  res.status(500).json({ 
-    message: 'Error interno del servidor',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
+// Global error handler personalizado
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
@@ -60,4 +52,6 @@ app.listen(PORT, () => {
   console.log(`🌐 URL: http://localhost:${PORT}`);
   console.log(`📋 API: http://localhost:${PORT}/api/event`);
   console.log(`💚 Health: http://localhost:${PORT}/health`);
+  console.log(`🔍 Nueva ruta: http://localhost:${PORT}/api/event/:id/full`);
+  console.log(`🏘️  Ruta barrio: http://localhost:${PORT}/api/event/barrioId/:id`);
 }); 
