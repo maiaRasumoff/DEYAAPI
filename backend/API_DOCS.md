@@ -127,7 +127,7 @@ http://localhost:3000/api/event
 - `imagen`
 - `nombre`
 - `ubicacion`
-- `idusuario` (FK → usuario.iduser)
+- `iduser` (FK → usuario.iduser)
 - `idbarrio` (FK → barrio.idbarrio)
 
 ### Tabla: barrio

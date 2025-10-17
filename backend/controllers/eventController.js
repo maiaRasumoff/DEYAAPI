@@ -6,7 +6,7 @@ async function listEvents(req, res) {
     console.log('📋 Listando todos los popups...');
     
     const { rows } = await db.query(
-      'SELECT idpopup, nombre, imagen, ubicacion, idusuario, idbarrio FROM popup ORDER BY idpopup ASC'
+      'SELECT idpopup, nombre, imagen, ubicacion, idbarrio FROM popup ORDER BY idpopup ASC'
     );
 
     console.log(`✅ Encontrados ${rows.length} popups`);
@@ -46,7 +46,7 @@ async function getEventDetail(req, res) {
     console.log(`🔍 Buscando popup con ID: ${id}`);
     
     const { rows } = await db.query(
-      'SELECT idpopup, nombre, imagen, ubicacion, idusuario, idbarrio FROM popup WHERE idpopup = $1',
+      'SELECT idpopup, nombre, imagen, ubicacion, idbarrio FROM popup WHERE idpopup = $1',
       [id]
     );
 
@@ -72,34 +72,24 @@ async function getEventDetail(req, res) {
   }
 }
 
-// OBTENER POPUP CON BARRIO Y USUARIO
+// OBTENER POPUP COMPLETO CON INFORMACIÓN DE BARRIO
 async function getEventFullDetail(req, res) {
   try {
     const { id } = req.params;
     
     console.log(`🔍 Buscando popup completo con ID: ${id}`);
     
-    // Query con JOINs para obtener popup, barrio y usuario
+    // Query con JOIN para obtener popup y barrio
     const query = `
       SELECT 
         p.idpopup,
         p.imagen,
         p.nombre,
         p.ubicacion,
-        p.idusuario,
         p.idbarrio,
-        b.nombrebarrio,
-        u.iduser,
-        u.nombreuser,
-        u.email,
-        u.contrasenia,
-        u.favoritos,
-        u.plan,
-        u.idestilo,
-        u.idbarrio as usuario_idbarrio
+        b.nombrebarrio
       FROM popup p
       LEFT JOIN barrio b ON p.idbarrio = b.idbarrio
-      LEFT JOIN usuario u ON p.idusuario = u.iduser
       WHERE p.idpopup = $1
     `;
     
@@ -121,17 +111,7 @@ async function getEventFullDetail(req, res) {
       imagen: popupData.imagen,
       nombre: popupData.nombre,
       ubicacion: popupData.ubicacion,
-      barrio: popupData.nombrebarrio || 'Barrio no encontrado',
-      usuario: popupData.iduser ? {
-        iduser: popupData.iduser,
-        nombreuser: popupData.nombreuser,
-        email: popupData.email,
-        contrasenia: popupData.contrasenia,
-        favoritos: popupData.favoritos,
-        plan: popupData.plan,
-        idestilo: popupData.idestilo,
-        idbarrio: popupData.usuario_idbarrio
-      } : null
+      barrio: popupData.nombrebarrio || 'Barrio no encontrado'
     };
 
     console.log(`✅ Popup completo con ID ${id} obtenido exitosamente`);
@@ -143,13 +123,6 @@ async function getEventFullDetail(req, res) {
     
   } catch (error) {
     console.error('❌ Error al obtener popup completo:', error);
-    
-    if (error.code === '23503') {
-      return res.status(400).json({
-        message: 'Error de referencia: El popup hace referencia a un barrio o usuario que no existe',
-        error: 'Foreign key constraint failed'
-      });
-    }
     
     return res.status(500).json({ 
       message: 'Error interno del servidor al obtener popup completo',
@@ -163,19 +136,42 @@ async function getBarrioById(req, res) {
   const { id } = req.params;
 
   try {
+    console.log(`🔍 Buscando barrio con ID: ${id}`);
+    
+    // Primero verificar si la tabla barrio existe
+    const tableCheck = await db.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'barrio'
+      );
+    `);
+    
+    if (!tableCheck.rows[0].exists) {
+      console.log('❌ La tabla barrio no existe');
+      return res.status(404).json({ 
+        error: 'Tabla barrio no encontrada en la base de datos' 
+      });
+    }
+    
     const result = await db.query(
-      'SELECT nombre FROM barrio WHERE idbarrio = $1',
+      'SELECT * FROM barrio WHERE idbarrio = $1',
       [id]
     );
 
     if (result.rows.length === 0) {
+      console.log(`❌ Barrio con ID ${id} no encontrado`);
       return res.status(404).json({ error: 'Barrio no encontrado' });
     }
 
-    return res.status(200).json({ nombre: result.rows[0].nombre });
+    console.log(`✅ Barrio con ID ${id} encontrado`);
+    return res.status(200).json({ nombre: result.rows[0].nombrebarrio });
   } catch (error) {
     console.error('❌ Error obteniendo barrio:', error);
-    return res.status(500).json({ error: 'Error interno del servidor' });
+    return res.status(500).json({ 
+      error: 'Error interno del servidor',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 }
 

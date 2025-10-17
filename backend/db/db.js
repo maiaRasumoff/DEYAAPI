@@ -1,5 +1,8 @@
-const { Pool } = require('pg');
 const dotenv = require('dotenv');
+dotenv.config();
+
+const { Pool } = require('pg');
+
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -13,9 +16,7 @@ const pool = new Pool({
 
 console.log('🔗 DATABASE_URL:', process.env.DATABASE_URL);
 
-pool.query('SELECT * FROM popup LIMIT 1')
-  .then(res => console.log('Prueba OK:', res.rows))
-  .catch(err => console.error('Prueba FAIL:', err));
+// Código de inspección removido - ya no es necesario
 
 
 dotenv.config();
